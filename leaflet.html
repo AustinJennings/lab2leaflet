@@ -1,0 +1,49 @@
+
+<html>
+<head>
+    <title>vornoi</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    
+    <style>
+        #map {
+            width: 800px;
+            height: 500px;
+        }
+
+    
+        
+    </style>
+</head>
+
+<body>
+
+    <div id="map"></div>
+
+<!--here is the reference the call to the geojson that I converted to js - if you look at this file- you will see I named the var 
+        TFDpoly can you find that later in this code? replace that with your variable name -->
+
+
+<script type="text/javascript" src="script/hless.js"></script>
+    
+    <script>
+        
+        var map = L.map('map').setView([ 47.2414, -122.4594], 12);
+
+        L.tileLayer('http://{s}.tile.stamen.com/terrain/{z}/{x}/{y}.png', {
+    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> — Map data © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    subdomains: 'abcd',
+            
+        }).addTo(map);
+
+        //add the geoJson file but no style
+
+L.geoJson(hless).addTo(map);
+
+
+
+    </script>
+</body>
+</html>
