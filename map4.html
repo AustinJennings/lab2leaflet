@@ -1,0 +1,208 @@
+
+<html>
+<head>
+   
+<!--Name Tab-->   
+
+    <title>Washington Homelessness</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!--Leaflet stylesheet (from http://leafletjs.com/examples/quick-start/ , not lab)-->
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+            integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ==" crossorigin=""/>
+
+<!--Leaflet JS (from http://leafletjs.com/examples/quick-start/ , not lab)--> 
+
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+            integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+   crossorigin=""></script>
+    
+    <style>
+        #map4 {
+            width: 100%;
+            height: 500px;
+        }
+
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Calibri, Tahoma, sans-serif;
+            background: #bf3030;
+            background: rgba(191,48,48,1.0);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+        .info h4 {
+            margin: 0 0 5px;
+            color: #e0e0e0;
+        }
+        .info p {
+            margin: 0 0 5px;
+            color: #4f0f0f;
+        }
+        .legend {
+            background: #000000;
+            text-align: left;
+            line-height: 18px;
+
+        }
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 1;
+        }
+        
+    </style>
+</head>
+
+<body>
+
+    <div id="map4"></div>
+
+<!---call json script-->
+
+    <script type="text/javascript" src="m4script/hless.js"></script>
+    
+        <script>
+        
+            var map = L.map('map4').setView([ 47.28, -119.0], 7);
+
+//// attribution and basemap settings
+
+L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+    maxZoom: 10,
+    minZoom: 5,
+    id: 'mapbox.pencil',
+    accessToken: 'pk.eyJ1IjoiYXVzdGluamVubmluZ3MiLCJhIjoiY2o4d2d3ZGtoMDgxZzJ4cGpuY282ZWxxYiJ9.IlsM6frsqtQ41Rs5QZ7irg '
+
+}).addTo(map);
+
+/// define, style geojson
+
+var geojson;
+
+        function resetHighlight(e) {
+            geojson.resetStyle(e.target);
+            info.update();
+        }
+
+        function zoomToFeature(e) {
+            map.fitBounds(e.target.getBounds());
+        }
+
+        function onEachFeature(feature, layer) {
+            layer.on({
+                mouseover: highlightFeature,
+                mouseout: resetHighlight,
+            });
+        }
+
+
+
+        geojson = L.geoJson(hless, {
+            style: style,
+            onEachFeature: onEachFeature
+        }).addTo(map);
+
+        map.attributionControl.addAttribution('2016 Homelessness Data &copy; <a href="http://www.commerce.wa.gov/serving-communities/homelessness/hmis/">WA State Dept. of Commerce, Homeless Management Information System (HMIS)</a>');
+
+//// From faculty.washington.edu/bricker0/map3.html -control that shows what the user is hovering over - white box in the top right
+        
+        var info = L.control();
+
+        info.onAdd = function (map) {   
+            this._div = L.DomUtil.create('div', 'info');
+            this.update();
+            return this._div;
+        };
+       
+ //update this next bit with your property names (I think of properties as attribute titles) also update the text in the heading tags to describe your data. If you are creating a choropleth map you may want to add '<b>' + props.NAME + '</b><br /> infront of the props.burgCount section so the name of the country or county will update as well, see the leaflet example code if you need more help
+
+        info.update = function (props) {
+            this._div.innerHTML = '<h4>Homelessness Rate by County, Washington State</h4>' + (props ? props.hpks + ' of every 1000 residents are homeless in ' + props.County + ' County'
+                : '<p>(Hover over a county to see its results)<p>');
+        };
+
+        info.addTo(map);
+        
+
+//// get color depending on burgCount which represents number of reports counted in the grid cell - first set color scheme
+
+    function getColor(d) {
+            return d > 10 ? '#A50F15' :
+                   d > 7.5  ? '#DE2D26' :
+                   d > 5   ? '#FB6A4A' :
+                   d > 2.5   ? '#FCAE91' :
+                   d > 0   ? '#FEE5D9' :
+                    d = 0 ?  '#707070' : '#707070';
+        }
+
+//styling the polygon so that fill changes with the value associated with the cell and number of reported burglary and B and E calls
+        
+        function style(feature) {
+    return {
+        fillColor: getColor(feature.properties.hpks),
+        weight: .8,
+        opacity: 1,
+        color: '#000000',
+        dashArray: '0',
+        fillOpacity: 0.75
+    };
+}
+
+//highlighting features - change the style as you see fit
+
+function highlightFeature(e) {
+            var layer = e.target;
+
+            layer.setStyle({
+                weight: 3,
+                color: '#000000',
+                fillOpacity: 1
+            });
+
+            if (!L.Browser.ie & !L.Browser.opera) {
+                layer.bringToFront();
+            }
+
+            info.update(layer.feature.properties);
+        }
+
+ //the static legend in the bottom right
+
+        var legend = L.control({position: 'bottomright'});
+
+        legend.onAdd = function (map) {
+
+var div = L.DomUtil.create('div', 'info legend'),
+                grades = [-1, 0.01, 2.5, 5, 7.5, 10, ],
+                key_labels = [ "Data not available", "0 to 2.4", "2.5 to 4.9", '5 to 7.4', '7.4to 9.9', '10 to 12.5'],
+                labels = ["<h4>Number of Homeless per 1000 Residents</br>"],
+                from, to;
+
+                                
+
+            for (var i = 0; i < grades.length; i++) {
+                from = grades[i];
+                to = grades[i + 1];
+
+                labels.push(
+                    '<i style="background:' + getColor(from + 1) + '"></i> ' +
+                     key_labels[i]);
+            }
+
+            div.innerHTML = labels.join('<br>');
+            return div;
+        };
+
+        legend.addTo(map);
+
+            map.on('click', onMapClick);
+
+        </script>
+</body>
+</html>
