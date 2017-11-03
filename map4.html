@@ -84,8 +84,7 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={
 /// define, style geojson
 
 var geojson;
-
-        function resetHighlight(e) {
+    function resetHighlight(e) {
             geojson.resetStyle(e.target);
             info.update();
         }
@@ -98,7 +97,11 @@ var geojson;
             layer.on({
                 mouseover: highlightFeature,
                 mouseout: resetHighlight,
+            //    click: zoomToFeature
             });
+
+            //creates a popup with other important data when clicked
+        layer.bindPopup('<strong> County Name: </strong>' + feature.properties.County + '<br>' + feature.properties.hpks + ' out of every 1000 residents are homelss here.' );
         }
 
 
